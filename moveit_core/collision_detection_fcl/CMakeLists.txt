@@ -51,6 +51,7 @@ if(BUILD_TESTING)
   if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
     add_compile_options(-Wno-deprecated-declarations)
   endif()
+  add_compile_definitions(NDEBUG=1)
 
   ament_add_gtest(test_fcl_collision_env test/test_fcl_env.cpp)
   target_link_libraries(test_fcl_collision_env moveit_test_utils moveit_collision_detection_fcl)

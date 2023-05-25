@@ -394,7 +394,7 @@ void PlanningScene::pushDiffs(const PlanningScenePtr& scene)
     }
   }
 }
-
+// this function takes the majority of the runtime
 void PlanningScene::checkCollision(const collision_detection::CollisionRequest& req,
                                    collision_detection::CollisionResult& res)
 {
@@ -1778,7 +1778,7 @@ bool PlanningScene::processCollisionObjectAdd(const moveit_msgs::msg::CollisionO
     return false;
   }
 
-  if (object.primitives.empty() && object.meshes.empty() && object.planes.empty())
+  if (object.primitives.empty() && object.meshes.empty() && object.planes.empty() && object.networks.empty())
   {
     RCLCPP_ERROR(LOGGER, "There are no shapes specified in the collision object message");
     return false;
