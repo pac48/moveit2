@@ -34,11 +34,14 @@
 
 /* Author: Ioan Sucan */
 
+#include <moveit/collision_detection_bullet/collision_detector_allocator_bullet.h>
+#include <moveit/collision_detection_fcl/collision_detector_allocator_fcl.h>
+#include <moveit/exceptions/exceptions.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/utils/message_checks.h>
-#include <moveit/exceptions/exceptions.h>
 #include <moveit_msgs/srv/get_planning_scene.hpp>
+
 
 #include <tf2/exceptions.h>
 #include <tf2/LinearMath/Transform.h>
@@ -195,6 +198,21 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
   else
   {
     RCLCPP_ERROR(LOGGER, "Robot model not loaded");
+  }
+
+  // load collision plugin
+  std::string collision_detection;
+  std::string collision_detection_parameter = "move_group.collision_detection"; // TODO(pac48) should be like node->get_effective_namespace()
+  if (!node_->has_parameter(collision_detection_parameter))
+  {
+    node_->declare_parameter(collision_detection_parameter, "fcl");
+  }
+  node_->get_parameter(collision_detection_parameter, collision_detection);
+  if (collision_detection =="fcl") {
+    // do nothing.
+  }
+  else if(collision_detection == "neural"){
+    scene_->allocateCollisionDetector(collision_detection::CollisionDetectorAllocatorBullet::create());
   }
 
   publish_planning_scene_frequency_ = 2.0;

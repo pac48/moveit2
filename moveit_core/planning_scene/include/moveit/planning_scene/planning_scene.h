@@ -998,6 +998,9 @@ private:
       return cenv_unpadded_const_;
     }
     void copyPadding(const CollisionDetector& src);
+    ~CollisionDetector(){
+      int o = 0;
+    }
   };
   friend struct CollisionDetector;
 
