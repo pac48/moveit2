@@ -316,7 +316,7 @@ int main(int argc, char** argv)
 
     mge.status();
     executor.add_node(nh);
-
+    executor.spin();
 
     rclcpp::shutdown();
   }

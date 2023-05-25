@@ -1703,8 +1703,13 @@ bool PlanningScene::shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::
     RCLCPP_ERROR(LOGGER, "More plane poses than planes in collision object message.");
     return false;
   }
+  if (object.networks.size() < object.network_poses.size())
+  {
+    RCLCPP_ERROR(LOGGER, "More plane poses than planes in collision object message.");
+    return false;
+  }
 
-  const int num_shapes = object.primitives.size() + object.meshes.size() + object.planes.size();
+  const int num_shapes = object.primitives.size() + object.meshes.size() + object.planes.size()+ object.networks.size();
   shapes.reserve(num_shapes);
   shape_poses.reserve(num_shapes);
 
@@ -1767,6 +1772,7 @@ bool PlanningScene::shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::
   treat_shape_vectors(object.primitives, object.primitive_poses, std::string("primitive_poses"));
   treat_shape_vectors(object.meshes, object.mesh_poses, std::string("meshes"));
   treat_shape_vectors(object.planes, object.plane_poses, std::string("planes"));
+  treat_shape_vectors(object.networks, object.network_poses, std::string("network"));
   return true;
 }
 

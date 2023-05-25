@@ -894,6 +894,12 @@ FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, 
       cg_g = new fcl::OcTreed(g->octree);
     }
     break;
+    case shapes::NEURAL:
+    {
+      const shapes::Neural* neural = static_cast<const shapes::Neural*>(shape.get());
+//      cg_g = new fcl::Network(neural); // TODO
+    }
+    break;
     default:
       RCLCPP_ERROR(LOGGER, "This shape type (%d) is not supported using FCL yet", static_cast<int>(shape->type));
       cg_g = nullptr;
