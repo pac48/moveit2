@@ -729,6 +729,12 @@ public:
     obj_->primitive_poses.push_back(*pose_);
   }
 
+  void operator()(const shape_msgs::msg::Network & network_msg) const
+  {
+    obj_->networks.push_back(network_msg);
+    obj_->network_poses.push_back(*pose_);
+  }
+
 private:
   moveit_msgs::msg::CollisionObject* obj_;
   const geometry_msgs::msg::Pose* pose_;

@@ -53,6 +53,70 @@
 #include <type_traits>
 #include <mutex>
 
+#include "fcl/geometry/shape/shape_base.h"
+namespace fcl
+{
+
+/// @brief Center at zero cylinder
+class FCL_EXPORT Neural : public ShapeBase<double>
+{
+public:
+
+  /// @brief Constructor
+  Neural(const shapes::Neural* neural);
+
+  /// @brief Radius of the cylinder
+  double radius;
+
+  /// @brief Compute AABB
+  void computeLocalAABB() override;
+
+  /// @brief Get node type: a cylinder
+  NODE_TYPE getNodeType() const override;
+
+  // Documentation inherited
+  double computeVolume() const override;
+
+  // Documentation inherited
+  Matrix3<double> computeMomentofInertia() const override;
+
+  /// @brief get the vertices of some convex shape which can bound this shape in
+  /// a specific configuration
+  std::vector<Vector3<double>> getBoundVertices(const Transform3<double>& tf) const;
+
+  friend
+      std::ostream& operator<<(std::ostream& out, const Neural& cylinder) {
+    out << "Neural object";
+    return out;
+  }
+};
+Neural::Neural(const shapes::Neural* neural)
+{
+}
+void Neural::computeLocalAABB()
+{
+}
+NODE_TYPE Neural::getNodeType() const
+{
+  return CollisionGeometry::getNodeType();
+}
+double Neural::computeVolume() const
+{
+  return CollisionGeometry::computeVolume();
+}
+Matrix3<double> Neural::computeMomentofInertia() const
+{
+  return CollisionGeometry::computeMomentofInertia();
+}
+std::vector<Vector3<double>> Neural::getBoundVertices(const Transform3<double>& tf) const
+{
+  return std::vector<Vector3<double>>();
+}
+
+} // namespace fcl
+
+
+
 namespace collision_detection
 {
 // Logger
@@ -897,7 +961,7 @@ FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, 
     case shapes::NEURAL:
     {
       const shapes::Neural* neural = static_cast<const shapes::Neural*>(shape.get());
-//      cg_g = new fcl::Network(neural); // TODO
+      cg_g = new fcl::Neural(neural); // TODO(pac48)
     }
     break;
     default:
