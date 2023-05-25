@@ -36,6 +36,7 @@
 
 #include <moveit/collision_detection_bullet/collision_detector_allocator_bullet.h>
 #include <moveit/collision_detection_fcl/collision_detector_allocator_fcl.h>
+#include <moveit/collision_detection_neural/collision_detector_allocator_neural.h>
 #include <moveit/exceptions/exceptions.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
@@ -212,7 +213,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
     // do nothing.
   }
   else if(collision_detection == "neural"){
-    scene_->allocateCollisionDetector(collision_detection::CollisionDetectorAllocatorBullet::create());
+    scene_->allocateCollisionDetector(collision_detection::CollisionDetectorAllocatorNeural::create());
   }
 
   publish_planning_scene_frequency_ = 2.0;
