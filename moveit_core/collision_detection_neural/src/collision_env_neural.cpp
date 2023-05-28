@@ -50,14 +50,36 @@ const std::string CollisionDetectorAllocatorNeural::NAME("Neural");
 CollisionEnvNeural::CollisionEnvNeural(const moveit::core::RobotModelConstPtr& model, double padding, double scale)
   : CollisionEnv(model, padding, scale)
 {
+  auto links = robot_model_->getLinkModelsWithCollisionGeometry();
+  for (const auto & link : links)
+  {
+    for (std::size_t j{ 0 }; j < link->getShapes().size(); ++j)
+    {
+      auto tmp = link->getShapes()[j]; // cast to shape to get verts
+//      tmp->global_link_transforms_
+    }
+  }
+
+  // request notifications about changes to new world
+  observer_handle_ = getWorld()->addObserver(
+      [this](const World::ObjectConstPtr& object, World::Action action) { notifyObjectChange(object, action); });
 }
 CollisionEnvNeural::CollisionEnvNeural(const moveit::core::RobotModelConstPtr& model, const WorldPtr& world,
                                        double padding, double scale)
   : CollisionEnv(model, world, padding, scale)
 {
+
+  // request notifications about changes to new world
+  observer_handle_ = getWorld()->addObserver(
+      [this](const World::ObjectConstPtr& object, World::Action action) { notifyObjectChange(object, action); });
 }
+
 CollisionEnvNeural::CollisionEnvNeural(const CollisionEnvNeural& other, const WorldPtr& world) : CollisionEnv(other, world)
 {
+
+  // request notifications about changes to new world
+  observer_handle_ = getWorld()->addObserver(
+      [this](const World::ObjectConstPtr& object, World::Action action) { notifyObjectChange(object, action); });
 }
 CollisionEnvNeural::~CollisionEnvNeural()
 {
@@ -74,6 +96,12 @@ void CollisionEnvNeural::checkSelfCollision(const CollisionRequest& req, Collisi
 void CollisionEnvNeural::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
                                              const moveit::core::RobotState& state) const
 {
+
+  for (const auto & link : robot_model_->getLinkModelsWithCollisionGeometry())
+  {
+    auto T = state.getGlobalLinkTransform(link->getName());
+//    T apply to verts
+  }
 }
 void CollisionEnvNeural::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
                                              const moveit::core::RobotState& state,
@@ -97,6 +125,10 @@ void CollisionEnvNeural::distanceRobot(const DistanceRequest& req, DistanceResul
 void CollisionEnvNeural::setWorld(const WorldPtr& world)
 {
   CollisionEnv::setWorld(world);
+
+  // request notifications about changes to new world
+  observer_handle_ = getWorld()->addObserver(
+      [this](const World::ObjectConstPtr& object, World::Action action) { notifyObjectChange(object, action); });
 }
 void CollisionEnvNeural::updatedPaddingOrScaling(const std::vector<std::string>& links)
 {
@@ -119,5 +151,6 @@ void CollisionEnvNeural::checkRobotCollision(const CollisionRequest& req, Collis
 }
 void CollisionEnvNeural::notifyObjectChange(const CollisionEnv::ObjectConstPtr& obj, World::Action action)
 {
+  int o = 0;
 }
 }  // end of namespace collision_detection
