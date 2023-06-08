@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>moveit_core</name>
+  <name>moveit_gpu_collision_plugin</name>
   <version>2.7.4</version>
   <description>Core libraries used by MoveIt</description>
 
@@ -39,6 +39,7 @@
   <depend>kdl_parser</depend>
   <depend>libfcl-dev</depend>
   <depend>moveit_common</depend>
+  <depend>moveit_core</depend>
   <depend>cuda_collision_checking</depend>
   <depend>ros2-tiny-cuda-nn</depend>
   <depend>moveit_msgs</depend>

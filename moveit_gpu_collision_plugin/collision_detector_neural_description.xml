@@ -1,0 +1,8 @@
+<library path="collision_detector_neural_plugin">
+  <class name="Neural" type="collision_detection::CollisionDetectorNeuralPluginLoader"
+  base_class_type="collision_detection::CollisionPlugin">
+    <description>
+      Neural Collision Detector, default for MoveIt.
+    </description>
+  </class>
+</library>

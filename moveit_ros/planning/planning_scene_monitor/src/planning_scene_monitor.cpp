@@ -226,7 +226,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
   double temp_wait_time = 0.05;
 
   if (!robot_description_.empty())
-  {
+  {fr
     node_->get_parameter_or(robot_description_ + "_planning.shape_transform_cache_lookup_wait_time", temp_wait_time,
                             temp_wait_time);
   }

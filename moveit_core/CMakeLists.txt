@@ -15,19 +15,19 @@ foreach(LIBFCL_LIBRARY ${LIBFCL_LIBRARIES})
 endforeach()
 set(LIBFCL_LIBRARIES "${LIBFCL_LIBRARIES_FULL}")
 
+find_package(Bullet 2.87 REQUIRED)
+find_package(Eigen3 REQUIRED)
+find_package(OCTOMAP REQUIRED)
 find_package(ament_cmake REQUIRED)
 find_package(angles REQUIRED)
-find_package(Bullet 2.87 REQUIRED)
 find_package(common_interfaces REQUIRED)
-find_package(eigen_stl_containers REQUIRED)
-find_package(Eigen3 REQUIRED)
 find_package(eigen3_cmake_module REQUIRED)
+find_package(eigen_stl_containers REQUIRED)
 find_package(generate_parameter_library REQUIRED)
 find_package(geometric_shapes REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(kdl_parser REQUIRED)
 find_package(moveit_msgs REQUIRED)
-find_package(OCTOMAP REQUIRED)
 find_package(octomap_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(random_numbers REQUIRED)
@@ -55,7 +55,7 @@ include(ConfigExtras.cmake)
 
 add_subdirectory(collision_detection_bullet)
 add_subdirectory(collision_detection_fcl)
-add_subdirectory(collision_detection_neural)
+#add_subdirectory(collision_detection_neural)
 add_subdirectory(collision_detection)
 add_subdirectory(collision_distance_field)
 add_subdirectory(constraint_samplers)
@@ -115,7 +115,6 @@ install(
     moveit_collision_detection
     moveit_collision_detection_bullet
     moveit_collision_detection_fcl
-    moveit_collision_detection_neural
     moveit_collision_distance_field
     moveit_constraint_samplers
     moveit_distance_field
@@ -136,30 +135,41 @@ install(
     moveit_trajectory_processing
     moveit_transforms
     moveit_utils
+#    moveit_collision_detection_neural
   EXPORT moveit_coreTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
 )
 
+#install(
+#    TARGETS
+#    moveit_collision_detection_neural
+#    LIBRARY DESTINATION lib
+#    ARCHIVE DESTINATION lib
+#    RUNTIME DESTINATION bin
+#)
+
 ament_export_targets(moveit_coreTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(
-  angles
   Bullet
-  common_interfaces
-  eigen_stl_containers
   Eigen3
+  OCTOMAP
+  angles
+  common_interfaces
+#  cuda_collision_checking
   eigen3_cmake_module
+  eigen_stl_containers
   generate_parameter_library
   geometric_shapes
   geometry_msgs
   kdl_parser
   moveit_msgs
-  OCTOMAP
   octomap_msgs
   pluginlib
   random_numbers
   rclcpp
+#  ros2-tiny-cuda-nn
   ruckig
   sensor_msgs
   shape_msgs

@@ -40,8 +40,8 @@
 #include <moveit/collision_detection_neural/collision_common.h>
 
 
-
 #include <memory>
+#include <tiny-cuda-nn/cpp_api.h>
 
 namespace collision_detection
 {
@@ -111,5 +111,9 @@ private:
   void notifyObjectChange(const ObjectConstPtr& obj, World::Action action);
 
   World::ObserverHandle observer_handle_;
+  tcnn::cpp::TrainableModel* trainable_model_;
+//  float *params_;
+//  cudaStream_t* stream_ptr_;
+  bool stream_active_ = false;
 };
 }  // namespace collision_detection

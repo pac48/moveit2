@@ -41,24 +41,74 @@
 #include <moveit/collision_detection_neural/neural_compat.h>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
+#include "geometric_shapes/shapes.h"
+
+#include "cuda_collision_checking/cuda_collision_checking.hpp"
+#include "tiny-cuda-nn/cpp_api.h"
+#include <rclcpp/logger.hpp>
 
 namespace collision_detection
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection_neural.collision_env_neural");
 const std::string CollisionDetectorAllocatorNeural::NAME("Neural");
 
+//void InitCommon(const moveit::core::RobotModelConstPtr& model, double padding, double scale)
+//{
+//
+//  auto links = model->getLinkModelsWithCollisionGeometry();
+//  for (const auto& link : links)
+//  {
+//    for (std::size_t j{ 0 }; j < link->getShapes().size(); ++j)
+//    {
+//      auto tmp = link->getShapes()[j];  // cast to shape to get verts
+//      if (tmp->type == shapes::MESH)
+//      {
+//        auto mesh = std::dynamic_pointer_cast<const shapes::Mesh>(tmp);  // cast to shape to get verts
+//      }
+//      else
+//      {
+//        RCLCPP_ERROR(LOGGER, "A non-MESH was found!!");
+//      }
+//      //      tmp->global_link_transforms_
+//
+//      //      mesh->triangles
+//      //      mesh->vertices
+//      //      mesh->vertex_count
+//    }
+//  }
+//}
+
 CollisionEnvNeural::CollisionEnvNeural(const moveit::core::RobotModelConstPtr& model, double padding, double scale)
   : CollisionEnv(model, padding, scale)
 {
-  auto links = robot_model_->getLinkModelsWithCollisionGeometry();
-  for (const auto & link : links)
-  {
-    for (std::size_t j{ 0 }; j < link->getShapes().size(); ++j)
-    {
-      auto tmp = link->getShapes()[j]; // cast to shape to get verts
-//      tmp->global_link_transforms_
-    }
-  }
+//  stream_ptr_ = new cudaStream_t();
+
+
+
+//  auto links = model->getLinkModelsWithCollisionGeometry();
+//  for (const auto& link : links)
+//  {
+//    for (std::size_t j{ 0 }; j < link->getShapes().size(); ++j)
+//    {
+//      auto tmp = link->getShapes()[j];  // cast to shape to get verts
+//      if (tmp->type == shapes::MESH)
+//      {
+//        auto mesh = std::dynamic_pointer_cast<const shapes::Mesh>(tmp);  // cast to shape to get verts
+//      }
+//      else
+//      {
+//        RCLCPP_ERROR(LOGGER, "A non-MESH was found!!");
+//      }
+//      //      tmp->global_link_transforms_
+//
+//      //      mesh->triangles
+//      //      mesh->vertices
+//      //      mesh->vertex_count
+//    }
+//  }
+
+
+
 
   // request notifications about changes to new world
   observer_handle_ = getWorld()->addObserver(
@@ -68,21 +118,47 @@ CollisionEnvNeural::CollisionEnvNeural(const moveit::core::RobotModelConstPtr& m
                                        double padding, double scale)
   : CollisionEnv(model, world, padding, scale)
 {
+//  stream_ptr_ = new cudaStream_t();
+
+
+//  auto links = model->getLinkModelsWithCollisionGeometry();
+//  for (const auto& link : links)
+//  {
+//    for (std::size_t j{ 0 }; j < link->getShapes().size(); ++j)
+//    {
+//      auto tmp = link->getShapes()[j];  // cast to shape to get verts
+//      if (tmp->type == shapes::MESH)
+//      {
+//        auto mesh = std::dynamic_pointer_cast<const shapes::Mesh>(tmp);  // cast to shape to get verts
+//      }
+//      else
+//      {
+//        RCLCPP_ERROR(LOGGER, "A non-MESH was found!!");
+//      }
+//    }
+//  }
+
 
   // request notifications about changes to new world
   observer_handle_ = getWorld()->addObserver(
       [this](const World::ObjectConstPtr& object, World::Action action) { notifyObjectChange(object, action); });
 }
 
-CollisionEnvNeural::CollisionEnvNeural(const CollisionEnvNeural& other, const WorldPtr& world) : CollisionEnv(other, world)
+CollisionEnvNeural::CollisionEnvNeural(const CollisionEnvNeural& other, const WorldPtr& world)
+  : CollisionEnv(other, world)
 {
-
   // request notifications about changes to new world
   observer_handle_ = getWorld()->addObserver(
       [this](const World::ObjectConstPtr& object, World::Action action) { notifyObjectChange(object, action); });
 }
 CollisionEnvNeural::~CollisionEnvNeural()
 {
+  if (stream_active_)
+  {
+//    cudaStreamDestroy(*stream_ptr_);
+//    delete stream_ptr_;
+    stream_active_ = false;
+  }
 }
 void CollisionEnvNeural::checkSelfCollision(const CollisionRequest& req, CollisionResult& res,
                                             const moveit::core::RobotState& state) const
@@ -96,23 +172,24 @@ void CollisionEnvNeural::checkSelfCollision(const CollisionRequest& req, Collisi
 void CollisionEnvNeural::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
                                              const moveit::core::RobotState& state) const
 {
-
-  for (const auto & link : robot_model_->getLinkModelsWithCollisionGeometry())
+  for (const auto& link : robot_model_->getLinkModelsWithCollisionGeometry())
   {
     auto T = state.getGlobalLinkTransform(link->getName());
-//    T apply to verts
+    //    T apply to verts
   }
 }
 void CollisionEnvNeural::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
                                              const moveit::core::RobotState& state,
                                              const AllowedCollisionMatrix& acm) const
 {
+  int o = 0;
 }
 void CollisionEnvNeural::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
                                              const moveit::core::RobotState& state1,
                                              const moveit::core::RobotState& state2,
                                              const AllowedCollisionMatrix& acm) const
 {
+  int o = 0;
 }
 void CollisionEnvNeural::distanceSelf(const DistanceRequest& req, DistanceResult& res,
                                       const moveit::core::RobotState& state) const
@@ -138,19 +215,45 @@ void CollisionEnvNeural::checkSelfCollisionHelper(const CollisionRequest& req, C
                                                   const moveit::core::RobotState& state,
                                                   const AllowedCollisionMatrix* acm) const
 {
+  int o = 0;
 }
 void CollisionEnvNeural::checkRobotCollisionHelper(const CollisionRequest& req, CollisionResult& res,
                                                    const moveit::core::RobotState& state,
                                                    const AllowedCollisionMatrix* acm) const
 {
+  int o = 0;
 }
 void CollisionEnvNeural::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
                                              const moveit::core::RobotState& state1,
                                              const moveit::core::RobotState& state2) const
 {
+  int o = 0;
 }
 void CollisionEnvNeural::notifyObjectChange(const CollisionEnv::ObjectConstPtr& obj, World::Action action)
 {
-  int o = 0;
+  if (action == World::DESTROY)
+  {
+    // delete object
+  }
+  else if (action == World::ADD_SHAPE || action == (World::CREATE + World::ADD_SHAPE))
+  {
+    assert(obj->shapes_.size() == 1);
+    assert(obj->shapes_[0]->type == shapes::ShapeType::NEURAL);
+    auto n_shape = std::dynamic_pointer_cast<const shapes::Neural>(obj->shapes_[0]);
+
+    if (!stream_active_)
+    {
+//      cudaStreamCreate(stream_ptr_);
+      stream_active_ = true;
+    }
+
+    constexpr uint32_t n_input_dims = 3;
+    constexpr uint32_t n_output_dims = 1;
+    trainable_model_ = tcnn::cpp::create_trainable_model(n_input_dims, n_output_dims, n_shape->config);
+
+//    params_ = trainable_model_->params();
+//    cudaMemcpy(params_, n_shape->weights.data(), n_shape->weights.size() * sizeof(float), cudaMemcpyDeviceToHost);
+
+  }
 }
 }  // end of namespace collision_detection
