@@ -146,6 +146,9 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
         return pauseServo(request, response);
       });
 
+  // set last commanded to current state
+  last_commanded_state_ = servo_->getCurrentRobotState();
+
   // Start the servoing loop
   servo_loop_thread_ = std::thread(&ServoNode::servoLoop, this);
 }
