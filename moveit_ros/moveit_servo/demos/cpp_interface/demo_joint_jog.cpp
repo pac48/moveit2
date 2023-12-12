@@ -89,9 +89,16 @@ int main(int argc, char* argv[])
   auto start_time = std::chrono::steady_clock::now();
 
   RCLCPP_INFO_STREAM(getLogger(), servo.getStatusMessage());
+  //create command queue to build trajectory message
+  std::deque<KinematicState> joint_cmd_rolling_window;
+  KinematicState current_state = servo.getCurrentRobotState();
+  current_state.time = demo_node->now();
+  joint_cmd_rolling_window.push_back(current_state);
+
   while (rclcpp::ok())
   {
-    const KinematicState joint_state = servo.getNextJointState(joint_jog);
+    current_state = joint_cmd_rolling_window.back();
+    const KinematicState joint_state = servo.getNextJointState(current_state, joint_jog);
     const StatusCode status = servo.getStatus();
 
     auto current_time = std::chrono::steady_clock::now();
@@ -103,7 +110,9 @@ int main(int argc, char* argv[])
     }
     else if (status != StatusCode::INVALID)
     {
-      trajectory_outgoing_cmd_pub->publish(composeTrajectoryMessage(servo_params, joint_state));
+      updateSlidingWindow(joint_state, joint_cmd_rolling_window, servo_params.max_expected_latency,
+                          demo_node->now());
+      trajectory_outgoing_cmd_pub->publish(composeTrajectoryMessage(servo_params, joint_cmd_rolling_window));
     }
     rate.sleep();
   }
