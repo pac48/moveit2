@@ -115,8 +115,7 @@ int main(int argc, char* argv[])
     }
     else if (status != StatusCode::INVALID)
     {
-      updateSlidingWindow(joint_state, joint_cmd_rolling_window, servo_params.max_expected_latency,
-                          demo_node->now());
+      updateSlidingWindow(joint_state, joint_cmd_rolling_window, servo_params.max_expected_latency, demo_node->now());
       trajectory_outgoing_cmd_pub->publish(composeTrajectoryMessage(servo_params, joint_cmd_rolling_window));
     }
     rate.sleep();
