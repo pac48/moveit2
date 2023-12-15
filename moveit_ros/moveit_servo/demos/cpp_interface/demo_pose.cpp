@@ -156,10 +156,11 @@ int main(int argc, char* argv[])
 
     // get next servo command
     joint_state = servo.getNextJointState(robot_state, target_pose);
+    joint_state.time = demo_node->now() + rclcpp::Duration::from_seconds(servo_params.max_expected_latency);
     StatusCode status = servo.getStatus();
     if (status != StatusCode::INVALID)
     {
-      updateSlidingWindow(joint_state, joint_cmd_rolling_window, servo_params.max_expected_latency, demo_node->now());
+      updateSlidingWindow(joint_state, joint_cmd_rolling_window, servo_params.max_expected_latency);
       trajectory_outgoing_cmd_pub->publish(composeTrajectoryMessage(servo_params, joint_cmd_rolling_window));
     }
 

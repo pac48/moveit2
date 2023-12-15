@@ -105,7 +105,8 @@ int main(int argc, char* argv[])
   {
     auto last_commanded_state = joint_cmd_rolling_window.back();
     robot_state->setJointGroupPositions(joint_model_group, last_commanded_state.positions);
-    const KinematicState joint_state = servo.getNextJointState(robot_state, joint_jog);
+    KinematicState joint_state = servo.getNextJointState(robot_state, joint_jog);
+    joint_state.time = demo_node->now() + rclcpp::Duration::from_seconds(servo_params.max_expected_latency);
     const StatusCode status = servo.getStatus();
 
     auto current_time = std::chrono::steady_clock::now();
@@ -117,7 +118,7 @@ int main(int argc, char* argv[])
     }
     else if (status != StatusCode::INVALID)
     {
-      updateSlidingWindow(joint_state, joint_cmd_rolling_window, servo_params.max_expected_latency, demo_node->now());
+      updateSlidingWindow(joint_state, joint_cmd_rolling_window, servo_params.max_expected_latency);
       trajectory_outgoing_cmd_pub->publish(composeTrajectoryMessage(servo_params, joint_cmd_rolling_window));
     }
     rate.sleep();

@@ -372,8 +372,8 @@ void ServoNode::servoLoop()
       if (use_trajectory)
       {
         auto& next_joint_state_value = next_joint_state.value();
-        updateSlidingWindow(next_joint_state_value, joint_cmd_rolling_window_, servo_params_.max_expected_latency,
-                            cur_time);
+        next_joint_state_value.time = cur_time + rclcpp::Duration::from_seconds(servo_params_.max_expected_latency);
+        updateSlidingWindow(next_joint_state_value, joint_cmd_rolling_window_, servo_params_.max_expected_latency);
         trajectory_publisher_->publish(composeTrajectoryMessage(servo_params_, joint_cmd_rolling_window_));
       }
       else

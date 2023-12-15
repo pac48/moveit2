@@ -118,8 +118,14 @@ geometry_msgs::msg::Pose poseFromCartesianDelta(const Eigen::VectorXd& delta_x,
 trajectory_msgs::msg::JointTrajectory
 composeTrajectoryMessage(const servo::Params& servo_params, const std::deque<KinematicState>& joint_cmd_rolling_window);
 
-void updateSlidingWindow(const KinematicState& next_joint_state, std::deque<KinematicState>& joint_cmd_rolling_window,
-                         double max_expected_latency, const rclcpp::Time& cur_time);
+/**
+ * \brief Adds a new joint state command to a queue containing commands over a time window. Also modifies the velocities
+ * of the commands to avoid overshooting.
+ * @param next_joint_state The next commanded joint state.
+ * @param joint_cmd_rolling_window Queue of containing a rolling window of joint commands.
+ */
+void updateSlidingWindow(KinematicState& next_joint_state, std::deque<KinematicState>& joint_cmd_rolling_window,
+                         double max_expected_latency);
 
 /**
  * \brief Create a Float64MultiArray message from given joint state
