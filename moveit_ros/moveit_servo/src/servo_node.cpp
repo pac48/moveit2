@@ -224,7 +224,7 @@ std::optional<KinematicState> ServoNode::processJointJogCommand(const moveit::co
   else
   {
     auto result = servo_->smoothHalt(last_commanded_state_);
-    new_joint_jog_msg_ = result.first;
+    new_joint_jog_msg_ = !result.first;
     if (new_joint_jog_msg_)
     {
       next_joint_state = result.second;
@@ -256,7 +256,7 @@ std::optional<KinematicState> ServoNode::processTwistCommand(const moveit::core:
   else
   {
     auto result = servo_->smoothHalt(last_commanded_state_);
-    new_twist_msg_ = result.first;
+    new_twist_msg_ = !result.first;
     if (new_twist_msg_)
     {
       next_joint_state = result.second;
@@ -285,7 +285,7 @@ std::optional<KinematicState> ServoNode::processPoseCommand(const moveit::core::
   else
   {
     auto result = servo_->smoothHalt(last_commanded_state_);
-    new_pose_msg_ = result.first;
+    new_pose_msg_ = !result.first;
     if (new_pose_msg_)
     {
       next_joint_state = result.second;
@@ -363,18 +363,10 @@ void ServoNode::servoLoop()
       new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
       RCLCPP_WARN_STREAM(getLogger(), "Command type has not been set, cannot accept input");
     }
-
-    // in trajectory mode, the commands must continue to stream. If no commands are received, then robot should try
-    // to eventually come to a stop
-    if (!next_joint_state && use_trajectory)
+    else if (use_trajectory)
     {
-      std::vector<double> zero_vel;
-      zero_vel.assign(current_state.positions.size(), 0);
-      auto cmd_type = servo_->getCommandType();
-      servo_->setCommandType(CommandType::JOINT_JOG);
-      JointJogCommand command{ current_state.joint_names, zero_vel };
-      next_joint_state = servo_->getNextJointState(robot_state, command);
-      servo_->setCommandType(cmd_type);
+      next_joint_state = joint_cmd_rolling_window_.back();
+      next_joint_state->velocities = Eigen::VectorXd::Zero(next_joint_state->velocities.size());
     }
 
     if (next_joint_state && (servo_->getStatus() != StatusCode::INVALID) &&
