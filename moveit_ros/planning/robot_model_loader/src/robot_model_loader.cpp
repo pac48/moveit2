@@ -123,6 +123,23 @@ void RobotModelLoader::configure(const Options& opt)
 
   if (model_ && !rdf_loader_->getRobotDescription().empty())
   {
+    std::string velocity_scaling_param =
+        rdf_loader_->getRobotDescription() + "_planning.default_velocity_scaling_factor";
+    double velocity_scaling = 1.0;
+    if (!node_->has_parameter(velocity_scaling_param))
+    {
+      node_->declare_parameter(velocity_scaling_param, rclcpp::ParameterType::PARAMETER_DOUBLE);
+      node_->get_parameter(velocity_scaling_param, velocity_scaling);
+    }
+    std::string acceleration_scaling_param =
+        rdf_loader_->getRobotDescription() + "_planning.default_acceleration_scaling_factor";
+    double acceleration_scaling = 1.0;
+    if (!node_->has_parameter(acceleration_scaling_param))
+    {
+      node_->declare_parameter(acceleration_scaling_param, rclcpp::ParameterType::PARAMETER_DOUBLE);
+      node_->get_parameter(acceleration_scaling_param, acceleration_scaling);
+    }
+
     // if there are additional joint limits specified in some .yaml file, read those in
     for (moveit::core::JointModel* joint_model : model_->getJointModels())
     {
@@ -206,6 +223,10 @@ void RobotModelLoader::configure(const Options& opt)
               RCLCPP_ERROR(logger_, "Specified a velocity limit for joint: %s but did not set a max velocity",
                            joint_limit[joint_id].joint_name.c_str());
             }
+            else
+            {
+              joint_limit[joint_id].max_velocity *= velocity_scaling;
+            }
           }
 
           if (has_acc_limits)
@@ -220,6 +241,10 @@ void RobotModelLoader::configure(const Options& opt)
             {
               RCLCPP_ERROR(logger_, "Specified an acceleration limit for joint: %s but did not set a max acceleration",
                            joint_limit[joint_id].joint_name.c_str());
+            }
+            else
+            {
+              joint_limit[joint_id].max_acceleration *= acceleration_scaling;
             }
           }
 

@@ -17,9 +17,14 @@ def generate_launch_description():
         .to_moveit_configs()
     )
 
+    # Increase acceleration limits with servo for better performance
+    moveit_config.joint_limits["robot_description_planning"][
+        "default_acceleration_scaling_factor"
+    ] = 5.0
+
     # Launch Servo as a standalone node or as a "node component" for better latency/efficiency
     launch_as_standalone_node = LaunchConfiguration(
-        "launch_as_standalone_node", default="false"
+        "launch_as_standalone_node", default="true"
     )
 
     # Get parameters for the Servo node

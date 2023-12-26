@@ -15,6 +15,11 @@ def generate_launch_description():
         .to_moveit_configs()
     )
 
+    # Increase acceleration limits with servo for better performance
+    moveit_config.joint_limits["robot_description_planning"][
+        "default_acceleration_scaling_factor"
+    ] = 5.0
+
     # Get parameters for the Servo node
     servo_params = {
         "moveit_servo": ParameterBuilder("moveit_servo")
