@@ -31,6 +31,7 @@ def generate_launch_description():
 
     # This set update rate for acceleration limiting filter
     acceleration_filter_rate = {"update_rate": 0.01}
+    move_group_name = {"move_group_name": "panda_arm"}
 
     # RViz
     rviz_config_file = (
@@ -96,6 +97,7 @@ def generate_launch_description():
                 parameters=[
                     servo_params,
                     acceleration_filter_rate,
+                    move_group_name,
                     moveit_config.robot_description,
                     moveit_config.robot_description_semantic,
                     moveit_config.robot_description_kinematics,
@@ -127,6 +129,7 @@ def generate_launch_description():
         parameters=[
             servo_params,
             acceleration_filter_rate,
+            move_group_name,
             moveit_config.robot_description,
             moveit_config.robot_description_semantic,
             moveit_config.robot_description_kinematics,
