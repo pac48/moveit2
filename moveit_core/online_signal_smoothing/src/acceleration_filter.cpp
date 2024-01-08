@@ -246,7 +246,7 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
     return false;
   }
 
-  if ((positions - last_positions_).norm() < 1E-6)
+  if ((positions - last_positions_).norm() < 1E-4 && (velocities - last_velocities_).norm() < 1E-4)
   {
     last_positions_ = positions;
     last_velocities_ = velocities;
@@ -278,7 +278,8 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
   Eigen::VectorXd lower_bound = vel_point - positions + min_acceleration_limits_ * (update_rate_ * update_rate_);
   update_data(A_sparse, lower_bound, upper_bound);
 
-  if (osqp_solve(work_) == 0 && work_->solution->x[0] >= -0.0001 && work_->solution->x[0] <= 1.0001)
+  if ((positions - last_positions_).norm() > 1E-4 && osqp_solve(work_) == 0 && work_->solution->x[0] >= -0.0001 &&
+      work_->solution->x[0] <= 1.0001)
   {
     double alpha = work_->solution->x[0];
     RCLCPP_ERROR(node_->get_logger(), "alpha: %f", alpha);
@@ -295,10 +296,11 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
     }
     Eigen::MatrixXd J = robot_state_->getJacobian(joint_model_group);
     Eigen::VectorXd target = J * last_velocities_;
-    //    target.block(3,0,3,1) *= 0;
-    Eigen::MatrixXd Jinv =
-        (J.transpose() * J + .0001 * Eigen::MatrixXd::Identity(J.cols(), J.cols())).inverse() * J.transpose();
-    Eigen::MatrixXd cartesian_point = last_positions_ + Jinv * target * update_rate_;
+    Eigen::MatrixXd Jinv = J.completeOrthogonalDecomposition().pseudoInverse();
+    Eigen::VectorXd q_dot = Eigen::VectorXd(variable_names_.size());
+    q_dot = Jinv * target;
+
+    Eigen::MatrixXd cartesian_point = last_positions_ + q_dot * update_rate_;
     offset = cartesian_point - last_positions_;
     for (int i = 0; i < num_constraints - 1; ++i)
     {
