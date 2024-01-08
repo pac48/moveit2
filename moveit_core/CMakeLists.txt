@@ -149,6 +149,7 @@ ament_export_dependencies(
   moveit_msgs
   OCTOMAP
   octomap_msgs
+  osqp
   pluginlib
   random_numbers
   rclcpp
