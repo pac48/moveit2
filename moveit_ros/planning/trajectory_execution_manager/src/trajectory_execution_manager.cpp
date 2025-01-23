@@ -1037,6 +1037,14 @@ bool TrajectoryExecutionManager::configure(TrajectoryExecutionContext& context,
   }
 
   reloadControllerInformation();
+  for (auto& controller : known_controllers_)
+  {
+    if (controller.first == "/joint_trajectory_controller"){
+    controller.second.joints_.insert("linear_x_joint"); // TODO remove hack
+    controller.second.joints_.insert("linear_y_joint"); // TODO remove hack
+    controller.second.joints_.insert("rotational_yaw_joint"); // TODO remove hack
+    }
+  }
   std::set<std::string> actuated_joints;
 
   auto is_actuated = [this](const std::string& joint_name) -> bool {
@@ -1117,6 +1125,15 @@ bool TrajectoryExecutionManager::configure(TrajectoryExecutionContext& context,
                               "Controller " << controller << " is not known. Known controllers: " << stream.str());
           return false;
         }
+      }
+    }
+    for (auto& controller : known_controllers_)
+    {
+      if (controller.first == "/joint_trajectory_controller")
+      {
+        controller.second.joints_.insert("linear_x_joint"); // TODO remove hack
+        controller.second.joints_.insert("linear_y_joint"); // TODO remove hack
+        controller.second.joints_.insert("rotational_yaw_joint"); // TODO remove hack
       }
     }
     if (selectControllers(actuated_joints, controllers, context.controllers_))

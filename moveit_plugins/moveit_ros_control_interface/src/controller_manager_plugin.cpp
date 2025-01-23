@@ -516,10 +516,14 @@ public:
       {
         auto ind = controller_name_map[chained_controller.name];
         dependency_map_[controller.name].push_back(chained_controller.name);
-        controller.required_command_interfaces = result->controller[ind].required_command_interfaces;
-        controller.claimed_interfaces = result->controller[ind].claimed_interfaces;
+        std::copy(result->controller[ind].claimed_interfaces.begin(), result->controller[ind].claimed_interfaces.end(), std::back_inserter(controller.claimed_interfaces));
         result->controller[ind].claimed_interfaces.clear();
         result->controller[ind].required_command_interfaces.clear();
+
+          controller.claimed_interfaces.push_back("linear_x_joint"); // TODO remove hack
+          controller.claimed_interfaces.push_back("linear_y_joint"); // TODO remove hack
+          controller.claimed_interfaces.push_back("rotational_yaw_joint"); // TODO remove hack
+
       }
     }
 
